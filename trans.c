@@ -1,39 +1,21 @@
-// prototype
-void searchRecord(FILE *fPtr);
-
-// Add in menu
-printf("6 - search an account\n");
-
-// Add in switch case
-case 6:
-    searchRecord(cfPtr);
-    break;
-
-// Function definition
-void searchRecord(FILE *fPtr)
+void displayAll(FILE *fPtr)
 {
-    unsigned int accountNum;
     struct clientData client = {0, "", "", 0.0};
 
-    printf("Enter account number to search (1 - 100): ");
-    scanf("%u", &accountNum);
+    rewind(fPtr);
 
-    // Move pointer to correct record
-    fseek(fPtr, (accountNum - 1) * sizeof(struct clientData), SEEK_SET);
+    printf("\n%-6s %-16s %-11s %10s\n",
+           "Acct", "Last Name", "First Name", "Balance");
 
-    // Read record
-    fread(&client, sizeof(struct clientData), 1, fPtr);
-
-    if (client.acctNum == 0)
+    while (fread(&client, sizeof(struct clientData), 1, fPtr))
     {
-        printf("Account not found.\n");
-    }
-    else
-    {
-        printf("\nAccount Details:\n");
-        printf("Account Number : %u\n", client.acctNum);
-        printf("Last Name      : %s\n", client.lastName);
-        printf("First Name     : %s\n", client.firstName);
-        printf("Balance        : %.2lf\n", client.balance);
+        if (client.acctNum != 0)
+        {
+            printf("%-6u %-16s %-11s %10.2lf\n",
+                   client.acctNum,
+                   client.lastName,
+                   client.firstName,
+                   client.balance);
+        }
     }
 }
