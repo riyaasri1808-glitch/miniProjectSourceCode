@@ -4,10 +4,10 @@
 // clientData structure definition
 struct clientData
 {
-    unsigned int acctNum;
-    char lastName[15];
-    char firstName[10];
-    double balance;
+    unsigned int acctNum; // account number
+    char lastName[15];    // account last name
+    char firstName[10];   // account first name
+    double balance;       // account balance
 };
 
 // prototypes
@@ -16,12 +16,12 @@ void textFile(FILE *readPtr);
 void updateRecord(FILE *fPtr);
 void newRecord(FILE *fPtr);
 void deleteRecord(FILE *fPtr);
-void displayAllRecords(FILE *fPtr); // New Feature
+void searchRecord(FILE *fPtr); // New feature
 
 int main(int argc, char *argv[])
 {
-    FILE *cfPtr;
-    unsigned int choice;
+    FILE *cfPtr;         // credit.dat file pointer
+    unsigned int choice; // user's choice
 
     // open file
     if ((cfPtr = fopen("credit.dat", "rb+")) == NULL)
@@ -35,24 +35,29 @@ int main(int argc, char *argv[])
     {
         switch (choice)
         {
+        // create text file
         case 1:
             textFile(cfPtr);
             break;
 
+        // update record
         case 2:
             updateRecord(cfPtr);
             break;
 
+        // create record
         case 3:
             newRecord(cfPtr);
             break;
 
+        // delete record
         case 4:
             deleteRecord(cfPtr);
             break;
 
+        // search account
         case 5:
-            displayAllRecords(cfPtr);
+            searchRecord(cfPtr);
             break;
 
         default:
@@ -70,6 +75,7 @@ void textFile(FILE *readPtr)
 {
     FILE *writePtr;
     int result;
+
     struct clientData client = {0, "", "", 0.0};
 
     if ((writePtr = fopen("accounts.txt", "w")) == NULL)
@@ -80,8 +86,12 @@ void textFile(FILE *readPtr)
     {
         rewind(readPtr);
 
-        fprintf(writePtr, "%-6s%-16s%-11s%10s\n",
-                "Acct", "Last Name", "First Name", "Balance");
+        fprintf(writePtr,
+                "%-6s%-16s%-11s%10s\n",
+                "Acct",
+                "Last Name",
+                "First Name",
+                "Balance");
 
         while (!feof(readPtr))
         {
@@ -111,6 +121,7 @@ void updateRecord(FILE *fPtr)
 {
     unsigned int account;
     double transaction;
+
     struct clientData client = {0, "", "", 0.0};
 
     printf("Enter account to update (1 - 100): ");
@@ -169,7 +180,8 @@ void deleteRecord(FILE *fPtr)
     scanf("%u", &accountNum);
 
     fseek(fPtr,
-          (accountNum - 1) * sizeof(struct clientData),
+          (accountNum - 1) *
+              sizeof(struct clientData),
           SEEK_SET);
 
     fread(&client,
@@ -248,32 +260,44 @@ void newRecord(FILE *fPtr)
     }
 }
 
-// NEW FEATURE - Display all accounts
-void displayAllRecords(FILE *fPtr)
+// NEW FEATURE - Search Account
+void searchRecord(FILE *fPtr)
 {
+    unsigned int accountNum;
+
     struct clientData client = {0, "", "", 0.0};
 
-    rewind(fPtr);
+    printf("Enter account number to search (1 - 100): ");
+    scanf("%u", &accountNum);
 
-    printf("\n%-6s%-16s%-11s%10s\n",
-           "Acct",
-           "Last Name",
-           "First Name",
-           "Balance");
+    fseek(fPtr,
+          (accountNum - 1) *
+              sizeof(struct clientData),
+          SEEK_SET);
 
-    while (fread(&client,
-                 sizeof(struct clientData),
-                 1,
-                 fPtr))
+    fread(&client,
+          sizeof(struct clientData),
+          1,
+          fPtr);
+
+    if (client.acctNum == 0)
     {
-        if (client.acctNum != 0)
-        {
-            printf("%-6u%-16s%-11s%10.2lf\n",
-                   client.acctNum,
-                   client.lastName,
-                   client.firstName,
-                   client.balance);
-        }
+        printf("Account not found.\n");
+    }
+    else
+    {
+        printf("\nAccount Details\n");
+        printf("Account Number : %u\n",
+               client.acctNum);
+
+        printf("Last Name      : %s\n",
+               client.lastName);
+
+        printf("First Name     : %s\n",
+               client.firstName);
+
+        printf("Balance        : %.2lf\n",
+               client.balance);
     }
 }
 
@@ -283,12 +307,12 @@ unsigned int enterChoice(void)
     unsigned int menuChoice;
 
     printf("\nEnter your choice\n"
-           "1 - Store accounts in text file\n"
-           "2 - Update an account\n"
-           "3 - Add a new account\n"
-           "4 - Delete an account\n"
-           "5 - Display all accounts\n"
-           "6 - End program\n? ");
+           "1 - store accounts in text file\n"
+           "2 - update an account\n"
+           "3 - add a new account\n"
+           "4 - delete an account\n"
+           "5 - search account\n"
+           "6 - end program\n? ");
 
     scanf("%u", &menuChoice);
 
